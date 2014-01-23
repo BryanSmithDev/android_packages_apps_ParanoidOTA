@@ -43,7 +43,8 @@ public class SettingsHelper {
 
     private static final String DEFAULT_CHECK_TIME = "18000000"; // five hours
     private static final boolean DEFAULT_CHECK_GAPPS = true;
-    private static final int DEFAULT_GAPPS_TYPE = GAPPS_FULL;
+    private static int DEFAULT_GAPPS_TYPE = GAPPS_FULL;
+
 
     private SharedPreferences settings;
 
@@ -61,8 +62,16 @@ public class SettingsHelper {
     }
 
     public int getGappsType() {
+        return getGappsType(DEFAULT_GAPPS_TYPE);
+    }
+
+    public int getGappsType(int defaultValue) {
+        if (defaultValue < 0 || defaultValue > 3) {
+            defaultValue = GAPPS_FULL;
+        }
+        DEFAULT_GAPPS_TYPE = defaultValue;
         return Integer.parseInt(settings.getString(PROPERTY_GAPPS_TYPE,
-                String.valueOf(DEFAULT_GAPPS_TYPE)));
+                String.valueOf(defaultValue)));
     }
 
     public void setDownloadRomId(Long id, String md5, String fileName) {

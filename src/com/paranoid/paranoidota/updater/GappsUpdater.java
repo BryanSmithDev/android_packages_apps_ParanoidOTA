@@ -82,6 +82,18 @@ public class GappsUpdater extends Updater {
         return mType;
     }
 
+    private int getTypeForSettings() {
+        int type = SettingsHelper.GAPPS_FULL;
+        if ("micro".equals(mType)) {
+            type = SettingsHelper.GAPPS_MICRO;
+        } else if ("mini".equals(mType)) {
+            type = SettingsHelper.GAPPS_MINI;
+        } else if ("stock".equals(mType)) {
+            type = SettingsHelper.GAPPS_STOCK;
+        }
+        return type;
+    }
+
     public String getPlatform() {
         return mPlatform == null ? "0" : mPlatform;
     }
@@ -98,7 +110,7 @@ public class GappsUpdater extends Updater {
 
     @Override
     public String getDevice() {
-        switch (getSettingsHelper().getGappsType()) {
+        switch (getSettingsHelper().getGappsType(getTypeForSettings())) {
             case SettingsHelper.GAPPS_MICRO :
                 return "gapps-micro";
             case SettingsHelper.GAPPS_MINI :

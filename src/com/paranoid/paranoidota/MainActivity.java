@@ -62,6 +62,7 @@ public class MainActivity extends Activity implements UpdaterListener, DownloadC
     public static final int STATE_INSTALL = 2;
     public static final int STATE_CHANGELOG = 3;
 
+
     private RecoveryHelper mRecoveryHelper;
     private RebootHelper mRebootHelper;
     private DownloadCallback mDownloadCallback;
@@ -205,6 +206,7 @@ public class MainActivity extends Activity implements UpdaterListener, DownloadC
                     return true;
                 }
                 setState(STATE_CHANGELOG, true, false);
+
                 switch (mState) {
                     case STATE_UPDATES :
                     case STATE_DOWNLOAD :

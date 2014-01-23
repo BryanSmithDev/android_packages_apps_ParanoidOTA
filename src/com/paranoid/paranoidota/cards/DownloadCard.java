@@ -68,6 +68,7 @@ public class DownloadCard extends Card implements DownloadCallback {
         mProgressBar.setVisibility(View.GONE);
         mProgress.setVisibility(View.GONE);
 
+        mCancel.setEnabled(false);
         mCancel.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
@@ -150,6 +151,7 @@ public class DownloadCard extends Card implements DownloadCallback {
 
     @Override
     public void onDownloadError(String reason) {
+        mCancel.setEnabled(false);
         mDownloadProgress = -1;
         mWaitProgressBar.setVisibility(View.GONE);
         mProgressBar.setVisibility(View.GONE);
@@ -158,6 +160,7 @@ public class DownloadCard extends Card implements DownloadCallback {
 
     @Override
     public void onDownloadProgress(int progress) {
+        mCancel.setEnabled(progress >= 0);
         mDownloadProgress = progress;
         if (progress < 0) {
             mWaitProgressBar.setVisibility(View.VISIBLE);
@@ -178,6 +181,7 @@ public class DownloadCard extends Card implements DownloadCallback {
 
     @Override
     public void onDownloadFinished(Uri uri, final String md5, boolean isRom) {
+        mCancel.setEnabled(false);
         mDownloadProgress = -1;
         mWaitProgressBar.setVisibility(View.GONE);
         mProgressBar.setVisibility(View.GONE);
