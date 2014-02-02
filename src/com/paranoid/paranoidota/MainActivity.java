@@ -36,6 +36,7 @@ import android.widget.TextView;
 
 import com.paranoid.paranoidota.Utils.NotificationInfo;
 import com.paranoid.paranoidota.activities.SettingsActivity;
+import com.paranoid.paranoidota.cards.ChangeLogCard;
 import com.paranoid.paranoidota.cards.DownloadCard;
 import com.paranoid.paranoidota.cards.InstallCard;
 import com.paranoid.paranoidota.cards.SystemCard;
@@ -59,6 +60,7 @@ public class MainActivity extends Activity implements UpdaterListener, DownloadC
     public static final int STATE_UPDATES = 0;
     public static final int STATE_DOWNLOAD = 1;
     public static final int STATE_INSTALL = 2;
+    public static final int STATE_CHANGELOG = 3;
 
     private RecoveryHelper mRecoveryHelper;
     private RebootHelper mRebootHelper;
@@ -68,6 +70,7 @@ public class MainActivity extends Activity implements UpdaterListener, DownloadC
     private UpdatesCard mUpdatesCard;
     private DownloadCard mDownloadCard;
     private InstallCard mInstallCard;
+    private ChangeLogCard mChangeLogCard;
 
     private RomUpdater mRomUpdater;
     private GappsUpdater mGappsUpdater;
@@ -171,6 +174,9 @@ public class MainActivity extends Activity implements UpdaterListener, DownloadC
             case STATE_INSTALL :
                 mInstallCard.saveState(outState);
                 break;
+            case STATE_CHANGELOG:
+                mChangeLogCard.saveState(outState);
+                break;
         }
     }
 
@@ -195,8 +201,10 @@ public class MainActivity extends Activity implements UpdaterListener, DownloadC
                 setState(STATE_INSTALL, true, false);
                 break;
             case 2 :
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(CHANGELOG));
-                startActivity(browserIntent);
+                if (mState == STATE_CHANGELOG) {
+                    return true;
+                }
+                setState(STATE_CHANGELOG, true, false);
                 switch (mState) {
                     case STATE_UPDATES :
                     case STATE_DOWNLOAD :
@@ -204,6 +212,9 @@ public class MainActivity extends Activity implements UpdaterListener, DownloadC
                         break;
                     case STATE_INSTALL :
                         getActionBar().setSelectedNavigationItem(1);
+                        break;
+                    case STATE_CHANGELOG :
+                        getActionBar().setSelectedNavigationItem(2);
                         break;
                 }
                 break;
@@ -308,6 +319,9 @@ public class MainActivity extends Activity implements UpdaterListener, DownloadC
                 actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
                 actionBar.setDisplayShowTitleEnabled(true);
                 break;
+            case STATE_CHANGELOG:
+                actionBar.setSelectedNavigationItem(2);
+                break;
         }
         if (mCheckMenuItem != null) {
             mCheckMenuItem.setVisible(state == STATE_UPDATES);
@@ -345,6 +359,12 @@ public class MainActivity extends Activity implements UpdaterListener, DownloadC
                 if (uri != null) {
                     mInstallCard.addFile(uri, md5);
                 }
+                break;
+            case STATE_CHANGELOG :
+                if (mChangeLogCard == null) {
+                    mChangeLogCard = new ChangeLogCard(mContext, null, mSavedInstanceState);
+                }
+                addCards(new Card[] { mChangeLogCard }, animate, true);
                 break;
         }
     }
