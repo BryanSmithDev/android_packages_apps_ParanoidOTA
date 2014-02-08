@@ -33,6 +33,8 @@ public class SettingsHelper {
     public static final String PROPERTY_CHECK_TIME = "checktime";
     public static final String PROPERTY_CHECK_GAPPS = "checkgapps";
     public static final String PROPERTY_GAPPS_TYPE = "gappstype";
+    public static final String PROPERTY_LOGIN = "goologin";
+    public static final String PROPERTY_LOGIN_USERNAME = "goologinusername";
 
     public static final String DOWNLOAD_ROM_ID = "download_rom_id";
     public static final String DOWNLOAD_GAPPS_ID = "download_gapps_id";
@@ -43,8 +45,8 @@ public class SettingsHelper {
 
     private static final String DEFAULT_CHECK_TIME = "18000000"; // five hours
     private static final boolean DEFAULT_CHECK_GAPPS = true;
-    private static int DEFAULT_GAPPS_TYPE = GAPPS_FULL;
 
+    private static int DEFAULT_GAPPS_TYPE = GAPPS_FULL;
 
     private SharedPreferences settings;
 
@@ -122,6 +124,30 @@ public class SettingsHelper {
         return settings.getString(DOWNLOAD_GAPPS_FILENAME, null);
     }
 
+    public void logout() {
+        savePreference(PROPERTY_LOGIN, "");
+    }
+
+    public void login(String value) {
+        savePreference(PROPERTY_LOGIN, value);
+    }
+
+    public void setLoginUserName(String value) {
+        savePreference(PROPERTY_LOGIN_USERNAME, value);
+    }
+
+    public boolean isLogged() {
+        return !"".equals(settings.getString(PROPERTY_LOGIN, ""));
+    }
+
+    public String getLogin() {
+        return settings.getString(PROPERTY_LOGIN, "");
+    }
+
+    public String getLoginUserName() {
+        return settings.getString(PROPERTY_LOGIN_USERNAME, null);
+    }
+
     private void savePreference(String preference, String value) {
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(preference, value);
@@ -134,3 +160,4 @@ public class SettingsHelper {
         editor.commit();
     }
 }
+
