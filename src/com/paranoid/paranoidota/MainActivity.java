@@ -112,12 +112,13 @@ public class MainActivity extends Activity implements UpdaterListener, DownloadC
 
         mRecoveryHelper = new RecoveryHelper(this);
         mRebootHelper = new RebootHelper(mRecoveryHelper);
-        DownloadHelper.init(this, this);
 
         mRomUpdater = new RomUpdater(this, false);
         mRomUpdater.addUpdaterListener(this);
         mGappsUpdater = new GappsUpdater(this, false);
         mGappsUpdater.addUpdaterListener(this);
+
+        DownloadHelper.init(this, this);
 
         Intent intent = getIntent();
         onNewIntent(intent);
@@ -381,8 +382,8 @@ public class MainActivity extends Activity implements UpdaterListener, DownloadC
         if (animate) {
             mCardsLayout.setAnimation(AnimationUtils.loadAnimation(this, R.anim.up_from_bottom));
         }
-        for (int i=0;i<cards.length;i++) {
-            mCardsLayout.addView(cards[i]);
+        for (Card card: cards){
+            mCardsLayout.addView(card);
         }
     }
 
