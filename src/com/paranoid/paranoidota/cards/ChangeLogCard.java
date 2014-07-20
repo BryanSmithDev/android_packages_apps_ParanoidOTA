@@ -24,6 +24,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.TextView;
 
 
@@ -49,9 +50,8 @@ public class ChangeLogCard extends Card {
     public ChangeLogCard(Context context, AttributeSet attrs, Bundle savedInstanceState) {
         super(context, attrs, savedInstanceState);
 
-        setTitle(R.string.changelog);
         setLayoutId(R.layout.card_changelog);
-
+        findViewById(R.id.header_layout).setVisibility(View.GONE);
         outtext= (TextView) findViewById(R.id.changelog); //change id if needed!!!
 
         new RetrieveChangeLogTask().execute("");

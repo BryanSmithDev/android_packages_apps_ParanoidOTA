@@ -19,19 +19,6 @@
 
 package com.paranoid.paranoidota;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Properties;
-
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -41,6 +28,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -53,6 +41,19 @@ import android.widget.Toast;
 import com.paranoid.paranoidota.helpers.SettingsHelper;
 import com.paranoid.paranoidota.updater.Updater;
 import com.paranoid.paranoidota.updater.Updater.PackageInfo;
+
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Properties;
 
 public class Utils {
 
@@ -96,10 +97,11 @@ public class Utils {
     }
 
     /**
-     * Method borrowed from OpenDelta
-     * Credits to Jorrit "Chainfire" Jongma and The OmniROM Project
-     * Using reflection voodoo instead calling the hidden class directly, to
-     * dev/test outside of AOSP tree
+     * Method borrowed from OpenDelta. Using reflection voodoo instead calling
+     * the hidden class directly, to dev/test outside of AOSP tree.
+     * 
+     * @author Jorrit "Chainfire" Jongma
+     * @author The OmniROM Project
      */
     public static boolean setPermissions(String path, int mode, int uid, int gid) {
         try {
@@ -108,14 +110,16 @@ public class Utils {
                     String.class,
                     int.class,
                     int.class,
-                    int.class });
+                    int.class
+            });
             return ((Integer) setPermissions.invoke(
                     null,
                     new Object[] {
                             path,
                             Integer.valueOf(mode),
                             Integer.valueOf(uid),
-                            Integer.valueOf(gid) }) == 0);
+                            Integer.valueOf(gid)
+                    }) == 0);
         } catch (Exception e) {
             // A lot of voodoo could go wrong here, return failure instead of
             // crash
@@ -143,7 +147,7 @@ public class Utils {
                 return number;
             }
             String newDateStr = postFormater.format(dateObj);
-    
+
             StringBuilder b = new StringBuilder(newDateStr);
             int i = 0;
             do {
@@ -257,16 +261,22 @@ public class Utils {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setContentTitle(resources.getString(R.string.new_system_update))
-                .setSmallIcon(R.drawable.ic_launcher).setContentIntent(pIntent);
+                .setSmallIcon(R.drawable.ic_launcher_mono)
+                .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_launcher))
+                .setContentIntent(pIntent);
 
         String contextText = "";
         if (infosRom.length + infosGapps.length == 1) {
             String filename = infosRom.length == 1 ? infosRom[0].getFilename() : infosGapps[0]
                     .getFilename();
-            contextText = resources.getString(R.string.new_package_name, new Object[] { filename });
+            contextText = resources.getString(R.string.new_package_name, new Object[] {
+                    filename
+            });
         } else {
-            contextText = resources.getString(R.string.new_packages, new Object[] { infosRom.length
-                    + infosGapps.length });
+            contextText = resources.getString(R.string.new_packages, new Object[] {
+                    infosRom.length
+                            + infosGapps.length
+            });
         }
         builder.setContentText(contextText);
 
@@ -281,6 +291,7 @@ public class Utils {
         for (int i = 0; i < infosGapps.length; i++) {
             inboxStyle.addLine(infosGapps[i].getFilename());
         }
+        inboxStyle.setSummaryText(resources.getString(R.string.app_name));
         builder.setStyle(inboxStyle);
 
         Notification notif = builder.build();

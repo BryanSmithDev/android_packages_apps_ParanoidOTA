@@ -19,12 +19,6 @@
 
 package com.paranoid.paranoidota.updater;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.json.JSONObject;
-
 import android.app.Activity;
 import android.content.Context;
 
@@ -37,6 +31,12 @@ import com.android.volley.toolbox.Volley;
 import com.paranoid.paranoidota.Utils;
 import com.paranoid.paranoidota.Version;
 import com.paranoid.paranoidota.helpers.SettingsHelper;
+
+import org.json.JSONObject;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class Updater implements Response.Listener<JSONObject>, Response.ErrorListener {
 
@@ -81,7 +81,7 @@ public abstract class Updater implements Response.Listener<JSONObject>, Response
 
     private Context mContext;
     private Server[] mServers;
-    private PackageInfo[] mLastUpdates;
+    private PackageInfo[] mLastUpdates = new PackageInfo[0];
     private List<UpdaterListener> mListeners = new ArrayList<UpdaterListener>();
     private RequestQueue mQueue;
     private SettingsHelper mSettingsHelper;
@@ -119,6 +119,9 @@ public abstract class Updater implements Response.Listener<JSONObject>, Response
     }
 
     public void setLastUpdates(PackageInfo[] infos) {
+        if (infos == null) {
+            infos = new PackageInfo[0];
+        }
         mLastUpdates = infos;
     }
 
@@ -172,10 +175,15 @@ public abstract class Updater implements Response.Listener<JSONObject>, Response
                 for (int i = 0; i < list.size(); i++) {
                     info = list.get(i);
                     String fileName = info.getFilename();
-                    if ((gappsType == SettingsHelper.GAPPS_MINI && !fileName.contains("-mini")) ||
-                            (gappsType == SettingsHelper.GAPPS_STOCK && !fileName.contains("-stock")) ||
-                            (gappsType == SettingsHelper.GAPPS_FULL && !fileName.contains("-full")) ||
-                            (gappsType == SettingsHelper.GAPPS_MICRO && !fileName.contains("-micro"))) {
+                    if ((gappsType == SettingsHelper.GAPPS_MINI && !fileName.contains("-mini"))
+                            ||
+                            (gappsType == SettingsHelper.GAPPS_STOCK && !fileName
+                                    .contains("-stock"))
+                            ||
+                            (gappsType == SettingsHelper.GAPPS_FULL && !fileName.contains("-full"))
+                            ||
+                            (gappsType == SettingsHelper.GAPPS_MICRO && !fileName
+                                    .contains("-micro"))) {
                         list.remove(i);
                         i--;
                         continue;

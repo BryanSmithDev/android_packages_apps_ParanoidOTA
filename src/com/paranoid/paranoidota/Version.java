@@ -23,30 +23,35 @@ import java.io.Serializable;
 
 /**
  * Class to manage different versions in the zip name.
- *
- * Format
- * pa_A-B-C.DE-FG-H.zip
- * where
- * A = device name, required
- * B = extra information, not required (for gapps)
- * C = major, integer from 0 to n, required
- * D = minor, integer from 0 to 9, required
- * E = maintenance, integer from 0 to n, not required
- * F = phase, possible values are A, B or RC, not required, default is gold/production
- * G = phase number, integer from 0 to n, not required
- * H = date, YYYYMMDD, not required, the format can be YYYYMMDDx where x is a letter (for gapps)
- *
+ * <p>
+ * Format<br>
+ * pa_A-B-C.DE-FG-H.zip<br>
+ * where<br>
+ * A = device name, required<br>
+ * B = extra information, not required (for gapps)<br>
+ * C = major, integer from 0 to n, required<br>
+ * D = minor, integer from 0 to 9, required<br>
+ * E = maintenance, integer from 0 to n, not required<br>
+ * F = phase, possible values are A, B or RC, not required, default is
+ * gold/production<br>
+ * G = phase number, integer from 0 to n, not required<br>
+ * H = date, YYYYMMDD, not required, the format can be YYYYMMDDx where x is a
+ * letter (for gapps)
+ * <p>
  * All the default values not specified above are 0
- *
- * Examples
- * pa_find5-3.99-RC2-20140212.zip
+ * <p>
+ * Examples<br>
+ * pa_find5-3.99-RC2-20140212.zip<br>
  * pa_gapps-modular-mini-4.3-20141010-signed.zip
- *
  */
 public class Version implements Serializable {
 
-    private final String[] STATIC_REMOVE = { ".zip", "pa_" };
-    private final String[] PHASES = { "ALPHA", "BETA", "RELEASE CANDIDATE", "GOLD" };
+    private final String[] STATIC_REMOVE = {
+            ".zip", "pa_"
+    };
+    private final String[] PHASES = {
+            "ALPHA", "BETA", "RC", ""
+    };
 
     private static final String SEPARATOR = "-";
 
@@ -68,7 +73,7 @@ public class Version implements Serializable {
 
     public Version(String fileName) {
 
-        for (String remove : STATIC_REMOVE){
+        for (String remove : STATIC_REMOVE) {
             fileName = fileName.replace(remove, "");
         }
 
@@ -77,7 +82,7 @@ public class Version implements Serializable {
         mDevice = split[0];
 
         // remove gapps extra names (modular, full, mini, etc)
-        while (split[1].matches ("\\w+\\.?")) {
+        while (split[1].matches("\\w+\\.?")) {
             String[] newSplit = new String[split.length - 1];
             newSplit[0] = split[0];
             for (int i = 2; i < split.length; i++) {
@@ -94,51 +99,57 @@ public class Version implements Serializable {
             return;
         }
 
-        String version = split[1];
-        int index = -1;
-        if ((index = version.indexOf(".")) > 0) {
-            mMajor = Integer.parseInt(version.substring(0, index));
-            version = version.substring(index + 1);
-            if (version.length() > 0) {
-                mMinor = Integer.parseInt(version.substring(0, 1));
-            }
-            if (version.length() > 1) {
-                String maintenance = version.substring(1);
-                if (maintenance.startsWith(".")) {
-                    maintenance = maintenance.substring(1);
+        try {
+            String version = split[1];
+            int index = -1;
+            if ((index = version.indexOf(".")) > 0) {
+                mMajor = Integer.parseInt(version.substring(0, index));
+                version = version.substring(index + 1);
+                if (version.length() > 0) {
+                    mMinor = Integer.parseInt(version.substring(0, 1));
                 }
-                mMaintenance = Integer.parseInt(maintenance);
+                if (version.length() > 1) {
+                    String maintenance = version.substring(1);
+                    if (maintenance.startsWith(".")) {
+                        maintenance = maintenance.substring(1);
+                    }
+                    mMaintenance = Integer.parseInt(maintenance);
+                }
+            } else {
+                mMajor = Integer.parseInt(version);
             }
-        } else {
-            mMajor = Integer.parseInt(version);
-        }
 
-        if (!Utils.isNumeric(split[2].substring(0, 1))) {
-            version = split[2];
-            if (version.startsWith("A")) {
-                mPhase = ALPHA;
-                if (version.startsWith("ALPHA")) {
-                    version = version.substring(5);
-                } else {
-                    version = version.substring(1);
+            if (!Utils.isNumeric(split[2].substring(0, 1))) {
+                version = split[2];
+                if (version.startsWith("A")) {
+                    mPhase = ALPHA;
+                    if (version.startsWith("ALPHA")) {
+                        version = version.substring(5);
+                    } else {
+                        version = version.substring(1);
+                    }
+                } else if (version.startsWith("B")) {
+                    mPhase = BETA;
+                    if (version.startsWith("BETA")) {
+                        version = version.substring(4);
+                    } else {
+                        version = version.substring(1);
+                    }
+                } else if (version.startsWith("RC")) {
+                    mPhase = RELEASE_CANDIDATE;
+                    version = version.substring(2);
                 }
-            } else if (version.startsWith("B")) {
-                mPhase = BETA;
-                if (version.startsWith("BETA")) {
-                    version = version.substring(4);
-                } else {
-                    version = version.substring(1);
+                if (!version.isEmpty()) {
+                    mPhaseNumber = Integer.parseInt(version);
                 }
-            } else if (version.startsWith("RC")) {
-                mPhase = RELEASE_CANDIDATE;
-                version = version.substring(2);
+                mDate = split[3];
+            } else {
+                mDate = split[2];
             }
-            if (!version.isEmpty()) {
-                mPhaseNumber = Integer.parseInt(version);
-            }
-            mDate = split[3];
-        } else {
-            mDate = split[2];
+        } catch (NumberFormatException ex) {
+            // malformed version, write the log and continue
+            // C derped something for sure
+            ex.printStackTrace();
         }
     }
 
@@ -179,18 +190,18 @@ public class Version implements Serializable {
     }
 
     public String toString() {
-        return toString(true, false);
+        return toString(true);
     }
 
-    public String toString(boolean showDevice, boolean separateMaintenance) {
-        return (showDevice ? mDevice + "-" : "")
+    public String toString(boolean showDevice) {
+        return (showDevice ? mDevice + " " : "")
                 + mMajor
                 + "."
                 + mMinor
-                + (mMaintenance > 0 ? (separateMaintenance ? "." : "")
+                + (mMaintenance > 0 ? "."
                         + mMaintenance : "")
-                + (mPhase != GOLD ? "-" + getPhaseName() + mPhaseNumber : "")
-                + "-" + mDate;
+                + (mPhase != GOLD ? " " + getPhaseName() + mPhaseNumber : "")
+                + " (" + mDate + ")";
     }
 
     public static Version fromGapps(String platform, String version) {

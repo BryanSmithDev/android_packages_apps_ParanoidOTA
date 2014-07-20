@@ -19,9 +19,6 @@
 
 package com.paranoid.paranoidota.cards;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -30,9 +27,9 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ProgressBar;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.paranoid.paranoidota.MainActivity;
@@ -46,6 +43,10 @@ import com.paranoid.paranoidota.widget.Card;
 import com.paranoid.paranoidota.widget.Item;
 import com.paranoid.paranoidota.widget.Item.OnItemClickListener;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class UpdatesCard extends Card implements UpdaterListener, OnCheckedChangeListener {
 
     private static final String ROMS = "ROMS";
@@ -58,6 +59,7 @@ public class UpdatesCard extends Card implements UpdaterListener, OnCheckedChang
     private TextView mError;
     private LinearLayout mAdditional;
     private TextView mAdditionalText;
+    private Item mCheck;
     private Item mDownload;
     private ProgressBar mWaitProgressBar;
     private String mErrorRom;
@@ -74,8 +76,11 @@ public class UpdatesCard extends Card implements UpdaterListener, OnCheckedChang
         mGappsUpdater.addUpdaterListener(this);
 
         if (savedInstanceState != null) {
-            mRomUpdater.setLastUpdates((PackageInfo[]) savedInstanceState.getSerializable(ROMS));
-            mGappsUpdater.setLastUpdates((PackageInfo[]) savedInstanceState.getSerializable(GAPPS));
+            List<PackageInfo> mRoms = (List) savedInstanceState.getSerializable(ROMS);
+            List<PackageInfo> mGapps = (List) savedInstanceState.getSerializable(GAPPS);
+
+            mRomUpdater.setLastUpdates(mRoms.toArray(new PackageInfo[mRoms.size()]));
+            mGappsUpdater.setLastUpdates(mGapps.toArray(new PackageInfo[mGapps.size()]));
         }
 
         setLayoutId(R.layout.card_updates);
@@ -83,11 +88,22 @@ public class UpdatesCard extends Card implements UpdaterListener, OnCheckedChang
         mLayout = (LinearLayout) findLayoutViewById(R.id.layout);
         mInfo = (TextView) findLayoutViewById(R.id.info);
         mError = (TextView) findLayoutViewById(R.id.error);
+        mCheck = (Item) findLayoutViewById(R.id.check);
         mDownload = (Item) findLayoutViewById(R.id.download);
         mWaitProgressBar = (ProgressBar) findLayoutViewById(R.id.wait_progressbar);
 
         mAdditional = (LinearLayout) findLayoutViewById(R.id.additional);
         mAdditionalText = (TextView) findLayoutViewById(R.id.additional_text);
+
+        mCheck.setOnItemClickListener(new OnItemClickListener() {
+
+            @Override
+            public void onClick(int id) {
+                MainActivity activity = (MainActivity) getContext();
+                activity.checkUpdates();
+            }
+
+        });
 
         mDownload.setOnItemClickListener(new OnItemClickListener() {
 
@@ -131,8 +147,14 @@ public class UpdatesCard extends Card implements UpdaterListener, OnCheckedChang
     @Override
     public void saveState(Bundle outState) {
         super.saveState(outState);
-        outState.putSerializable(ROMS, mRomUpdater.getLastUpdates());
-        outState.putSerializable(GAPPS, mGappsUpdater.getLastUpdates());
+        ArrayList<PackageInfo> mRoms = new ArrayList<PackageInfo>();
+        ArrayList<PackageInfo> mGapps = new ArrayList<PackageInfo>();
+
+        mRoms.addAll(Arrays.asList(mRomUpdater.getLastUpdates()));
+        mGapps.addAll(Arrays.asList(mGappsUpdater.getLastUpdates()));
+
+        outState.putSerializable(ROMS, mRoms);
+        outState.putSerializable(GAPPS, mGapps);
     }
 
     private void updateText() {
@@ -141,6 +163,7 @@ public class UpdatesCard extends Card implements UpdaterListener, OnCheckedChang
 
         mNumChecked = 0;
         mDownload.setEnabled(false);
+        mCheck.setEnabled(!mRomUpdater.isScanning() && !mGappsUpdater.isScanning());
 
         for (int i = mAdditional.getChildCount() - 1; i >= 0; i--) {
             if (mAdditional.getChildAt(i) instanceof TextView) {
@@ -270,21 +293,24 @@ public class UpdatesCard extends Card implements UpdaterListener, OnCheckedChang
             mLayout.addView(check);
             TextView text = new TextView(context);
             text.setText(packages[i].getFilename());
-            text.setTextSize(TypedValue.COMPLEX_UNIT_PX, res.getDimension(R.dimen.card_medium_text_size));
+            text.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                    res.getDimension(R.dimen.card_medium_text_size));
             text.setTextColor(R.color.card_text);
             text.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
                     LayoutParams.WRAP_CONTENT));
             mAdditional.addView(text);
             text = new TextView(context);
             text.setText(packages[i].getSize());
-            text.setTextSize(TypedValue.COMPLEX_UNIT_PX, res.getDimension(R.dimen.card_small_text_size));
+            text.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                    res.getDimension(R.dimen.card_small_text_size));
             text.setTextColor(R.color.card_text);
             text.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
                     LayoutParams.WRAP_CONTENT));
             mAdditional.addView(text);
             text = new TextView(context);
             text.setText(res.getString(R.string.update_host, packages[i].getHost()));
-            text.setTextSize(TypedValue.COMPLEX_UNIT_PX, res.getDimension(R.dimen.card_small_text_size));
+            text.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                    res.getDimension(R.dimen.card_small_text_size));
             text.setTextColor(R.color.card_text);
             text.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
                     LayoutParams.WRAP_CONTENT));

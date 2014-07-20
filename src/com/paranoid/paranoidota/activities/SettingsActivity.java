@@ -19,9 +19,6 @@
 
 package com.paranoid.paranoidota.activities;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -44,6 +41,9 @@ import com.paranoid.paranoidota.URLStringReader.URLStringReaderListener;
 import com.paranoid.paranoidota.Utils;
 import com.paranoid.paranoidota.helpers.SettingsHelper;
 import com.paranoid.paranoidota.widget.Preference;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 public class SettingsActivity extends PreferenceActivity implements
         OnSharedPreferenceChangeListener {
@@ -114,11 +114,22 @@ public class SettingsActivity extends PreferenceActivity implements
         if (SettingsHelper.PROPERTY_CHECK_TIME.equals(key)) {
             Utils.setAlarm(this, mSettingsHelper.getCheckTime(), false, true);
         }
+        if (SettingsHelper.PROPERTY_GAPPS_TYPE.equals(key)) {
+            updateSummaries();
+        }
     }
 
     private void updateSummaries() {
+        final CharSequence gappsType = mGappsType.getEntry();
+        if (gappsType != null) {
+            mGappsType.setSummary(gappsType);
+        } else {
+            mGappsType.setSummary(R.string.settings_gappstype_summary);
+        }
+
         if (mSettingsHelper.isLogged()) {
-            mGoo.setSummary(getResources().getString(R.string.logged_in, mSettingsHelper.getLoginUserName()));
+            mGoo.setSummary(getResources().getString(R.string.logged_in,
+                    mSettingsHelper.getLoginUserName()));
         } else {
             mGoo.setSummary(R.string.settings_login_goo);
         }
@@ -140,7 +151,8 @@ public class SettingsActivity extends PreferenceActivity implements
                     public void onClick(DialogInterface dialog, int whichButton) {
                         dialog.dismiss();
 
-                        final ProgressDialog progressDialog = new ProgressDialog(SettingsActivity.this);
+                        final ProgressDialog progressDialog = new ProgressDialog(
+                                SettingsActivity.this);
                         progressDialog.setIndeterminate(true);
                         progressDialog.setMessage(getResources().getString(R.string.logging_in));
                         progressDialog.setCancelable(false);
@@ -174,7 +186,8 @@ public class SettingsActivity extends PreferenceActivity implements
                                         Utils.showToastOnUiThread(SettingsActivity.this,
                                                 R.string.error_logging_invalid);
                                     } else {
-                                        Utils.showToastOnUiThread(SettingsActivity.this, R.string.error_logging_down);
+                                        Utils.showToastOnUiThread(SettingsActivity.this,
+                                                R.string.error_logging_down);
                                     }
                                 }
 
@@ -182,7 +195,8 @@ public class SettingsActivity extends PreferenceActivity implements
                                 public void onReadError(Exception ex) {
                                     progressDialog.dismiss();
                                     ex.printStackTrace();
-                                    Utils.showToastOnUiThread(SettingsActivity.this, R.string.error_logging_in);
+                                    Utils.showToastOnUiThread(SettingsActivity.this,
+                                            R.string.error_logging_in);
                                 }
 
                             }).execute(url);

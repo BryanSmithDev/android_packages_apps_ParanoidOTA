@@ -19,10 +19,6 @@
 
 package com.paranoid.paranoidota.updater;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.Properties;
-
 import android.content.Context;
 
 import com.paranoid.paranoidota.R;
@@ -30,6 +26,10 @@ import com.paranoid.paranoidota.Utils;
 import com.paranoid.paranoidota.Version;
 import com.paranoid.paranoidota.helpers.SettingsHelper;
 import com.paranoid.paranoidota.updater.server.GooServer;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.Properties;
 
 public class GappsUpdater extends Updater {
 
@@ -39,12 +39,17 @@ public class GappsUpdater extends Updater {
     private static final String PLATFORM_PROPERTY = "ro.build.version.release";
     private static final String TYPE_PROPERTY = "ro.addon.pa_type";
 
+    private Version mRomVersion;
     private String mPlatform;
-    private String mVersion = "-1";
+    private String mVersion = "0";
     private String mType;
 
     public GappsUpdater(Context context, boolean fromAlarm) {
-        super(context, new Server[] { new GooServer(context, false) }, fromAlarm);
+        super(context, new Server[] {
+                new GooServer(context, false)
+        }, fromAlarm);
+
+        mRomVersion = new Version(RomUpdater.getVersionString(context));
 
         File file = new File(PROPERTIES_FILE);
         if (file.exists()) {
@@ -65,7 +70,9 @@ public class GappsUpdater extends Updater {
                     String[] version = versionString.split("-");
                     for (int i = 0; i < version.length; i++) {
                         try {
-                            Integer.parseInt(new String(new char[] {version[i].charAt(0)}));
+                            Integer.parseInt(new String(new char[] {
+                                    version[i].charAt(0)
+                            }));
                             mVersion = version[i];
                             break;
                         } catch (NumberFormatException ex) {
@@ -114,16 +121,19 @@ public class GappsUpdater extends Updater {
 
     @Override
     public String getDevice() {
-        switch (getSettingsHelper().getGappsType(getTypeForSettings())) {
-            case SettingsHelper.GAPPS_MICRO :
-                return "gapps-micro";
-            case SettingsHelper.GAPPS_MINI :
-                return "gapps-mini";
+        final String gapps = "GApps/Android " + mRomVersion.getMajor() + "."
+                + mRomVersion.getMinor() + "/";
+        int type = getSettingsHelper().getGappsType(getTypeForSettings());
+        switch (type) {
+            case SettingsHelper.GAPPS_MICRO:
+                return gapps + "Micro-Modular GApps";
+            case SettingsHelper.GAPPS_MINI:
+                return gapps + "Mini-Modular GApps";
             case SettingsHelper.GAPPS_STOCK:
-                return "gapps";
-            case SettingsHelper.GAPPS_FULL :
-            default :
-                return "gapps-full";
+                return gapps + "Google Stock GApps";
+            case SettingsHelper.GAPPS_FULL:
+            default:
+                return gapps + "Full-Modular GApps";
         }
     }
 

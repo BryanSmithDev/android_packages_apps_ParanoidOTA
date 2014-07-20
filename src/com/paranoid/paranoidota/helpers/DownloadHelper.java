@@ -19,24 +19,25 @@
 
 package com.paranoid.paranoidota.helpers;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
-
 import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.app.DownloadManager.Request;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 
 import com.paranoid.paranoidota.IOUtils;
 import com.paranoid.paranoidota.R;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 
 public class DownloadHelper {
 
@@ -75,9 +76,12 @@ public class DownloadHelper {
                     DownloadManager.STATUS_SUCCESSFUL,
                     0,
                     0,
-                    -1 };
+                    -1
+            };
             long[] statusGapps = sDownloadingGapps ? getDownloadProgress(idGapps, false)
-                    : new long[] { DownloadManager.STATUS_SUCCESSFUL, 0, 0, -1 };
+                    : new long[] {
+                            DownloadManager.STATUS_SUCCESSFUL, 0, 0, -1
+                    };
 
             int status = DownloadManager.STATUS_SUCCESSFUL;
             if (statusRom[0] == DownloadManager.STATUS_FAILED
@@ -262,7 +266,7 @@ public class DownloadHelper {
                         return null;
                     }
 
-                }.execute((Void)null);
+                }.execute((Void) null);
             }
 
         } else {
@@ -274,8 +278,11 @@ public class DownloadHelper {
     private static void realDownloadFile(String url, String fileName, String md5, boolean isRom) {
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
         request.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        request.setVisibleInDownloadsUi(false);
         request.setTitle(sContext.getResources().getString(R.string.download_title,
-                new Object[] { fileName }));
+                new Object[] {
+                    fileName
+                }));
         File file = new File(IOUtils.DOWNLOAD_PATH);
         if (!file.exists()) {
             file.mkdirs();
@@ -380,7 +387,9 @@ public class DownloadHelper {
             cursor.close();
         }
 
-        return new long[] { status, totalBytes, downloadedBytes, error };
+        return new long[] {
+                status, totalBytes, downloadedBytes, error
+        };
     }
 
     private static void checkIfDownloading() {
@@ -412,37 +421,42 @@ public class DownloadHelper {
 
     private static int getDownloadError(Cursor cursor) {
         int columnReason = cursor.getColumnIndex(DownloadManager.COLUMN_REASON);
-        int reason = cursor.getInt(columnReason);
         int reasonText = -1;
-        switch (reason) {
-            case DownloadManager.ERROR_CANNOT_RESUME:
-                reasonText = R.string.error_cannot_resume;
-                break;
-            case DownloadManager.ERROR_DEVICE_NOT_FOUND:
-                reasonText = R.string.error_device_not_found;
-                break;
-            case DownloadManager.ERROR_FILE_ALREADY_EXISTS:
-                reasonText = R.string.error_file_already_exists;
-                break;
-            case DownloadManager.ERROR_FILE_ERROR:
-                reasonText = R.string.error_file_error;
-                break;
-            case DownloadManager.ERROR_HTTP_DATA_ERROR:
-                reasonText = R.string.error_http_data_error;
-                break;
-            case DownloadManager.ERROR_INSUFFICIENT_SPACE:
-                reasonText = R.string.error_insufficient_space;
-                break;
-            case DownloadManager.ERROR_TOO_MANY_REDIRECTS:
-                reasonText = R.string.error_too_many_redirects;
-                break;
-            case DownloadManager.ERROR_UNHANDLED_HTTP_CODE:
-                reasonText = R.string.error_unhandled_http_code;
-                break;
-            case DownloadManager.ERROR_UNKNOWN:
-            default:
-                reasonText = R.string.error_unknown;
-                break;
+        try {
+            int reason = cursor.getInt(columnReason);
+            switch (reason) {
+                case DownloadManager.ERROR_CANNOT_RESUME:
+                    reasonText = R.string.error_cannot_resume;
+                    break;
+                case DownloadManager.ERROR_DEVICE_NOT_FOUND:
+                    reasonText = R.string.error_device_not_found;
+                    break;
+                case DownloadManager.ERROR_FILE_ALREADY_EXISTS:
+                    reasonText = R.string.error_file_already_exists;
+                    break;
+                case DownloadManager.ERROR_FILE_ERROR:
+                    reasonText = R.string.error_file_error;
+                    break;
+                case DownloadManager.ERROR_HTTP_DATA_ERROR:
+                    reasonText = R.string.error_http_data_error;
+                    break;
+                case DownloadManager.ERROR_INSUFFICIENT_SPACE:
+                    reasonText = R.string.error_insufficient_space;
+                    break;
+                case DownloadManager.ERROR_TOO_MANY_REDIRECTS:
+                    reasonText = R.string.error_too_many_redirects;
+                    break;
+                case DownloadManager.ERROR_UNHANDLED_HTTP_CODE:
+                    reasonText = R.string.error_unhandled_http_code;
+                    break;
+                case DownloadManager.ERROR_UNKNOWN:
+                default:
+                    reasonText = R.string.error_unknown;
+                    break;
+            }
+        } catch (CursorIndexOutOfBoundsException ex) {
+            // don't crash, just report it
+            reasonText = R.string.error_unknown;
         }
         return reasonText;
     }
