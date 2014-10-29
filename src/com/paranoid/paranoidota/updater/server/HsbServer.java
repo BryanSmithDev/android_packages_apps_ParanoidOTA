@@ -34,7 +34,7 @@ import com.paranoid.paranoidota.updater.Updater.PackageInfo;
 
 public class HsbServer implements Server {
 
-    private static final String URL = "http://aospal.hostingsharedbox.com/updates/%s";
+    private static final String URL = "http://api.aospal.com/updates/%s";
 
     private String mDevice = null;
     private String mError = null;
