@@ -34,7 +34,7 @@ import java.util.List;
 
 public class DlxServer implements Server {
 
-    private static final String URL = "https://gist.github.com/BryanSmithDev/04ef656a8000f63403fc/raw/";
+    private static final String URL = "https://gist.githubusercontent.com/BryanSmithDev/959b1603e082b00a8b6d/raw/";
 
     private String mDevice = null;
     private String mError = null;

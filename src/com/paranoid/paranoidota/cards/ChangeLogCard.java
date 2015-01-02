@@ -69,7 +69,7 @@ public class ChangeLogCard extends Card {
         protected String doInBackground(String... params) {
             HttpClient httpClient = new DefaultHttpClient();
             HttpContext localContext = new BasicHttpContext();
-            HttpGet httpGet = new HttpGet("https://gist.github.com/BryanSmithDev/fc4eb534ab5a0af67a0a/raw/"); //URL!
+            HttpGet httpGet = new HttpGet("https://gist.githubusercontent.com/BryanSmithDev/d7ed479149c5436a6f64/raw/"); //URL!
             HttpResponse response = null;
             try {
                 response = httpClient.execute(httpGet, localContext);
